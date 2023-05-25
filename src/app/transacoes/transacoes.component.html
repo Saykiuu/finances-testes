@@ -1,0 +1,232 @@
+<section>
+    <div class="actions">
+        <button class="btn btnPadrao mr-2" (click)="openModalCadastro()">
+            Adicionar
+        </button>
+        <button class="btn btn-icon" (click)="openModalFiltro()">
+            <span class="material-icons">
+                filter_alt
+            </span>
+        </button>
+    </div>
+    <div class="tabela box">
+        <table class="table" *ngIf="listTransacoes.length >  0">
+            <tr id="here">
+                <th>Descrição</th>
+                <th>Data</th>
+                <th>Valor</th>
+                <th>tipo</th>
+                <th>tag</th>
+                <th></th>
+            </tr>
+            <tbody>
+                <tr *ngFor="let lt of listTransacoes, index as i">
+                    <td>{{lt.causa}}</td>
+                    <td>{{formatData(lt.data)}}</td>
+                    <td>{{formatValores(lt.valor, lt.tipo)}}</td>
+                    <td>{{lt.tipo}}</td>
+                    <td>{{lt.tag}}</td>
+                    <td>
+                        <a (click)="openModalDetalhes(lt.id)">
+                            <span class="material-icons " style="font-size: 15px;">
+                                open_in_new
+                            </span>
+                        </a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="valor-vazio" *ngIf="listTransacoes.length ==  0 && loading == false ">
+            <p>Não possui dados</p>
+        </div>
+
+        <div class="valor-vazio " *ngIf="listTransacoes.length ==  0 && loading == true ">
+            <div class="loader"></div>
+        </div>
+    </div>
+</section>
+
+
+<div bsModal #filtro="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="dialog-sizes-name1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="dialog-sizes-name1" class="modal-title pull-left  card-title">Filtrar</h3>
+                <button type="button" class="btn-close close pull-right" (click)="filtro.hide()" aria-label="Close">
+                    <span aria-hidden="true" class="visually-hidden">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="formulario">
+                    <div class="d-flex flex-wrap form-group">
+                        <div class="col-6">
+                            <label for="">Data Inicial</label>
+                            <input type="date" class="form-control" [ngModel]="filtros.data_inicial | date:'yyyy-MM-dd'"
+                                (ngModelChange)="filtros.data_inicial = $event">
+                        </div>
+                        <div class="col-6">
+                            <label for="">Data Final</label>
+                            <input type="date" class="form-control" [ngModel]="filtros.data_final | date:'yyyy-MM-dd'"
+                                (ngModelChange)="filtros.data_final = $event">
+                        </div>
+
+                    </div>
+
+
+                    <div class="d-flex flex-wrap form-group">
+                        <div class="col-8">
+                            <label for="">Tipo de transação</label>
+                            <select class="form-control" [(ngModel)]="filtros.tipo">
+                                <option value="">Geral</option>
+                                <option value="E">Entradas</option>
+                                <option value="S">Saídas</option>
+                            </select>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button class="btnPadrao button" (click)="filtrar()">Filtrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div bsModal #cadastro="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="dialog-sizes-name1"
+    [config]="{backdrop: 'static'}">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content ">
+            <div class="modal-header">
+                <h3 id="dialog-sizes-name1" class="modal-title pull-left card-title">Nova Transação</h3>
+                <button type="button" class="btn-close close pull-right" (click)="cadastro.hide()" aria-label="Close">
+                    <span aria-hidden="true" class="visually-hidden">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body ">
+                <div class="tabset">
+
+                    <div class="tab" [ngClass]="{'selected-tab': newTransacao.tipo == 'E' }" (click)="changeTipo('E')">
+                        Entrada</div>
+                    <div class="tab" [ngClass]="{'selected-tab': newTransacao.tipo == 'S' }" (click)="changeTipo('S')">
+                        Saída</div>
+                </div>
+                <div class="formulario p-3" [ngSwitch]="newTransacao.tipo">
+                    <fieldset *ngSwitchCase="'E'">
+                        <div class="form-row form-group">
+                            <div class="col-sm-6">
+                                <label for="">Tags</label>
+                                <select class="form-control" [(ngModel)]="newTransacao.tag"
+                                    (change)="changeTag($event)">
+                                    <option value="dizimos">Dízimo</option>
+                                    <option value="ofertas">Oferta</option>
+                                    <option value="doacao">Doação</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col-sm-8">
+                                <label for="">Descrição</label>
+                                <select class="form-control" *ngIf="newTransacao.exibir_membros"
+                                    [(ngModel)]="newTransacao.descricao">
+                                    <option value="" selected>Selecione</option>
+                                    <option *ngFor="let m of listMembros" value="{{m.id}}">{{m.nome}}</option>
+                                </select>
+                                <input type="text" class="form-control" [(ngModel)]="newTransacao.descricao"
+                                    [disabled]="newTransacao.desabilitar" *ngIf="!newTransacao.exibir_membros">
+                            </div>
+                            <div class="col-sm-4 form-group">
+                                <label for="">Valor</label>
+                                <input type="text" class="form-control" [(ngModel)]="newTransacao.valor"
+                                    mask="separator.2" thousandSeparator=".">
+                            </div>
+                            <div class="col-12 form-group">
+                                <label for="">Observação</label>
+                                <input type="text" class="form-control" [(ngModel)]="newTransacao.obs">
+                            </div>
+                        </div>
+                    </fieldset>
+                    <fieldset *ngSwitchCase="'S'">
+                        <div class="form-row">
+                            <div class="form-check m-3">
+                                <input class="form-check-input" type="checkbox" id="despesas"
+                                    [(ngModel)]="newTransacao.exibir_debitos" (change)="showListDebitos()">
+                                <label class="form-check-label" for="despesas">
+                                    Exibir débitos
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col-sm-8">
+                                <label for="">Descrição</label>
+                                <input type="text" class="form-control" [(ngModel)]="newTransacao.descricao"
+                                    *ngIf="!newTransacao.exibir_debitos">
+                                <select class="form-control" [(ngModel)]="newTransacao.descricao"
+                                    *ngIf="newTransacao.exibir_debitos" (change)="changeDebitos($event)">
+                                    <option value="{{deb.id}}" *ngFor="let deb of listaDebitos">{{deb.descricao}} -
+                                        {{deb.atual_p}}/{{deb.qtd_p}}</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-4 form-group">
+                                <label for="">Valor</label>
+                                <input type="text" class="form-control" mask="separator.2" thousandSeparator="."
+                                    [(ngModel)]="newTransacao.valor" [disabled]="newTransacao.desabilitar_valor">
+                            </div>
+                            <div class="col-12 form-group">
+                                <label for="">Observação</label>
+                                <input type="text" class="form-control" [(ngModel)]="newTransacao.obs">
+                            </div>
+                        </div>
+
+                    </fieldset>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btnPadrao button" (click)="salvar()" [disabled]="disabledInput">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div bsModal #view="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="dialog-sizes-name1"
+    [config]="{backdrop: 'static'}">
+    <div class="modal-dialog">
+        <div class="modal-content ">
+            <div class="modal-header">
+                <h3 id="dialog-sizes-name1" class="modal-title pull-left card-title">Detalhes</h3>
+                <button type="button" class="btn-close close pull-right" (click)="view.hide()" aria-label="Close">
+                    <span aria-hidden="true" class="visually-hidden">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body ">
+
+                <div class="formulario ">
+                    <div class="form-row">
+                        <p class="ask">Código: <span class="res"> {{detalheTransacao.id}}</span></p>
+                    </div>
+                    <div class="form-row">
+                        <p class="ask">tipo: <span class="res">{{formatTipo(detalheTransacao.tipo)}}</span></p>
+                        <p class="ask">Tag: <span class="res">{{detalheTransacao.tag}}</span></p>
+                        <p class="ask">Valor: <span
+                                class="res">{{formatValores(detalheTransacao.valor,detalheTransacao.tipo )}}</span></p>
+                        <p class="ask">Data: <span class="res">{{formatData(detalheTransacao.data)}}</span></p>
+                    </div>
+                    <div class="form-row">
+                        <p class="ask">Descrição: <span class="res">{{detalheTransacao.causa}}</span></p>
+                    </div>
+                    <div>
+                        <p class="ask">Observação: </p>
+                        <span class="res">{{detalheTransacao.obs}}</span>
+                    </div>
+
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btnPadrao button" (click)="view.hide()">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>

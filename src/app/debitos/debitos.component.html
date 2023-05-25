@@ -1,0 +1,182 @@
+<section>
+    <div class="actions">
+        <button class="btn btnPadrao mr-2" (click)="openModalAdicionar()">Adicionar</button>
+        <button class="btn btn-icon " (click)="openModalFiltro()">
+            <span class="material-icons">
+                filter_alt
+            </span>
+        </button>
+
+    </div>
+    <div class="tabela box">
+        <table class="table" *ngIf="listaDebitos.length >  0">
+            <tr>
+                <th>Descrição</th>
+                <th>qtd. Parc.</th>
+                <th>Parcelas</th>
+                <th>status</th>
+                <th>Valor</th>
+                <th></th>
+
+            </tr>
+            <tbody>
+                <tr *ngFor="let lt of listaDebitos, index as i">
+                    <td>{{lt.descricao}}</td>
+                    <td>{{lt.atual_p}}/{{lt.qtd_p}}</td>
+                    <td>{{lt.valor_p}}</td>
+                    <td>{{lt.status}}</td>
+                    <td>{{lt.valor_t}}</td>
+                    <td>
+                        <a (click)="openModalDetalhes(lt.id)">
+                            <span class="material-icons " style="font-size: 15px;">
+                                open_in_new
+                            </span>
+                        </a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="valor-vazio" *ngIf="listaDebitos.length ==  0 && loading == false ">
+            <p>Não possui dados</p>
+        </div>
+
+        <div class="valor-vazio " *ngIf="listaDebitos.length ==  0 && loading == true ">
+            <div class="loader"></div>
+        </div>
+    </div>
+</section>
+
+
+<div bsModal #addDebitos="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="dialog-sizes-name1">
+    <div class="modal-dialog ">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="dialog-sizes-name1" class="modal-title pull-left">Novo Débito</h3>
+                <button type="button" class="btn-close close pull-right" (click)="addDebitos.hide()" aria-label="Close">
+                    <span aria-hidden="true" class="visually-hidden">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="formulario">
+                    <div class="form-group col-12">
+                        <label for="">Descrição</label>
+                        <input type="text" class="form-control" [(ngModel)]="addDebito.descricao">
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div class="form-group col-5">
+                            <label for="">Dia do pagamento</label>
+                            <select class="form-control" [(ngModel)]="addDebito.dia_pagamento">
+                                <option value="{{ld}}" *ngFor="let ld of listOfDays">{{ld}}</option>
+                            </select>
+
+                        </div>
+                    </div>
+                    <div class="d-flex">
+                        <div class="form-group col-7">
+                            <label for="">Valor total</label>
+                            <input type="number" class="form-control" [(ngModel)]="addDebito.valor" placeholder="0"
+                                (ngModelChange)="calcResumo()">
+                        </div>
+
+                        <div class="form-group col-5">
+                            <label for="">Qtd parcelas</label>
+                            <input type="number" class="form-control" [(ngModel)]="addDebito.qtd_parcela"
+                                (ngModelChange)="calcResumo()">
+                        </div>
+                    </div>
+
+                    <div class="form-group col-5">
+                        <span>Resumo</span>
+
+                        <div class="">
+                            {{calcResumo()}}
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button class="btnPadrao button" (click)="insereDebito()">Adicionar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div bsModal #filtro="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="dialog-sizes-name1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="dialog-sizes-name1" class="modal-title pull-left card-title">Filtrar</h3>
+                <button type="button" class="btn-close close pull-right" (click)="filtro.hide()" aria-label="Close">
+                    <span aria-hidden="true" class="visually-hidden">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="formulario">
+                    <div class="form-group">
+                        <label for="">Descrição</label>
+                        <input type="text" class="form-control" [(ngModel)]="filtros.descricao">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="">Status</label>
+                        <select class="form-control" [(ngModel)]="filtros.status">
+                            <option value="A">Abertos</option>
+                            <option value="F">Finalizados</option>
+                            <option value="0">Todos</option>
+                        </select>
+                    </div>
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button class="btnPadrao button" (click)="filtrar()">Filtrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div bsModal #view="bs-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="dialog-sizes-name1"
+    [config]="{backdrop: 'static'}">
+    <div class="modal-dialog">
+        <div class="modal-content ">
+            <div class="modal-header">
+                <h3 id="dialog-sizes-name1" class="modal-title pull-left card-title">Detalhes</h3>
+                <button type="button" class="btn-close close pull-right" (click)="view.hide()" aria-label="Close">
+                    <span aria-hidden="true" class="visually-hidden">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body ">
+
+                <div class="formulario ">
+                    <div class="form-row">
+                        <p class="ask">Código: <span class="res"> {{viewDebitos.id}}</span></p>
+                    </div>
+                    <div class="form-row">
+                        <p class="ask">Descrição: <span class="res"> {{viewDebitos.descricao}}</span></p>
+                    </div>
+                    <div class="form-row">
+                        <p class="ask">Status: <span class="res"> {{viewDebitos.status}}</span></p>
+                        <p class="ask">Qtd parcelas: <span class="res"> {{viewDebitos.qtd_p}}</span></p>
+                        <p class="ask">Parcela atual: <span class="res"> {{viewDebitos.atual_p}}</span></p>
+                    </div>
+                    <div class="form-row">
+                        <p class="ask">Valor da parcela: <span class="res">
+                                {{formatCurrency(viewDebitos.valor_p)}}</span></p>
+                        <p class="ask">Valor da total: <span class="res"> {{formatCurrency(viewDebitos.valor_t)}}</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btnPadrao button" (click)="view.hide()">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,105 @@
+<section>
+    <div class="d-flex flex-wrap list-cards">
+        <div class="col-lg-3 col-sm-6 grid">
+            <div class="card-info box">
+                <span *ngIf="!loadSaldo">
+                    <div class="card-title">Mês Anterior</div>
+                    <span class="card-body">{{formatValores(saldoFinal)}}</span>
+                </span>
+                <div class="d-flex justify-content-center" *ngIf="loadSaldo">
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-sm-6 grid">
+            <div class="card-info box">
+                <span *ngIf="!loadSaida">
+                    <div class="card-title">Saida</div>
+                    <span class="card-body">
+                        <span> - </span> {{formatValores(saidasTotais)}}
+                    </span>
+                </span>
+                <div class="d-flex justify-content-center align-items-center" *ngIf="loadSaida">
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-sm-6 grid">
+            <div class="card-info box">
+                <span *ngIf="!loadEntrada">
+                    <div class="card-title">Entradas</div>
+                    <span class="card-body">
+                        <span> + </span>{{formatValores(entradasTotais)}}
+                    </span>
+                </span>
+                <div class="d-flex justify-content-center" *ngIf="loadEntrada">
+                    <div class="loader"></div>
+                </div>
+
+            </div>
+        </div>
+        <div class="col-lg-3 col-sm-6 grid">
+
+            <div class="card-info box">
+                <span *ngIf="!loadEntrada && !loadSaida && !loadSaldo">
+                    <div class="card-title">Montante</div>
+                    <span class="card-body">{{formatValores(entradasTotais + saldoFinal - saidasTotais)}}</span>
+                </span>
+                <div class="d-flex justify-content-center" *ngIf="loadEntrada || loadSaida || loadSaldo">
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="tabelas">
+        <div class="d-flex flex-wrap">
+            <div class="col-lg-8">
+                <div class="grafico box">
+                    <div class="content-load" *ngIf="loadGrafico">
+                        <div class="loader"></div>
+                    </div>
+                    <div>
+                        <div class="card-title" *ngIf="!loadGrafico">
+                            Gráfico
+                        </div>
+                        <div id="divChart">
+                            <canvas id="MyChart">{{chart}}</canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="historico box ">
+                    <div class="content-load" *ngIf="loadHistorico">
+                        <div class="loader"></div>
+                    </div>
+                    <div>
+                        <div class="card-title" *ngIf="!loadHistorico">
+                            Histórico de transações
+                        </div>
+
+
+                        <ul class="hist-list">
+                            <li class="empty-item" *ngIf="historico.length == 0 ">
+                                Não há dados
+                            </li>
+
+                            <li class="hist-list-item box"
+                                [ngStyle]="{'border-color': (h.tipo == 'E') ? '#2BCC2E' : '#ed4337'}"
+                                *ngFor="let h of historico">
+                                <div class="hist-head">
+                                    <span class="hist-title">{{h.causa}}</span>
+                                    <span class="hist-desc">{{formatData(h.data)}}</span>
+                                </div>
+                                <div class="hist-qtd" [ngStyle]="{'color': (h.tipo == 'E') ? '#2BCC2E' : '#ed4337'}">
+                                    <span *ngIf="h.tipo == 'E'"> + </span>
+                                    <span *ngIf="h.tipo == 'S'"> - </span> {{formatValores(h.valor)}}
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

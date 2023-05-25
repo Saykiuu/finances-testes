@@ -1,3 +1,5 @@
 export const environment = {
-  production: true
+  production: true,
+
+  LOCALAPI: 'http://localhost:20080/'
 };

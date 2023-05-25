@@ -1,0 +1,55 @@
+.corpo {
+    overflow-y: hidden;
+    max-height: calc(100vh - 60px);
+}
+
+.resto {
+    width: calc(100vw - 230px);
+}
+
+.open-side {
+    position: absolute;
+    right: 10px;
+    top: 15px;
+    display: none;
+    color: white;
+    z-index: 5;
+
+}
+
+.side-nav {
+    transition: all 0.4s;
+    z-index: 6;
+    width: 270px;
+}
+
+
+.open-side label:hover {
+    cursor: pointer;
+}
+
+@media (max-width: 1480px) {
+    .side-nav {
+
+        position: fixed;
+        top: 60px;
+        left: 0px;
+        width: 0px;
+    }
+
+    .resto {
+        width: 100vw;
+    }
+
+    .open-side {
+        display: block;
+    }
+}
+
+#side-control {
+    display: none;
+}
+
+#side-control:checked~.side-nav {
+    width: 270px;
+}
